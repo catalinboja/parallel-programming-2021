@@ -6,7 +6,7 @@ public class Contor {
 	
 	long valoare = 0;
 	
-	public void incrementare() {
+	public synchronized void incrementare() {
 		this.valoare += 1;
 	}
 	

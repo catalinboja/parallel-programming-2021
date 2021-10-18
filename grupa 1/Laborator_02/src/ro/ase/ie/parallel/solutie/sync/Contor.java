@@ -6,7 +6,7 @@ public class Contor {
 	
 	long contor = 0;
 	
-	public void increment() {
+	public synchronized void increment() {
 		this.contor += 1;
 	}
 	
