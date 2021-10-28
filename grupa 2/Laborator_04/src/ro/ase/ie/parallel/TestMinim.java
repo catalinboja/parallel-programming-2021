@@ -8,12 +8,12 @@ public class TestMinim {
 	static boolean esteMaiMic(int a, int b) {
 		int rez = 0;
 
-		for(int i = 0 ; i< 1600; i++) {
+		for(int i = 1 ; i< 1600; i++) {
 			float temp = (float)a/i;
 			rez += (int) temp;
 		}
 		
-		for(int i = 0 ; i< 1600; i++) {
+		for(int i = 1 ; i< 1600; i++) {
 			float temp = (float)a/i;
 			rez += (int) temp;
 		}
