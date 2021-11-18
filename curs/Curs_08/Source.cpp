@@ -8,9 +8,9 @@
 
 using namespace std;
 
-const long N = 1e10;
+const long N = 1e11;
 const int NR_THREAD = 8;
-const long LIMITA_SUP = (long)1e8;
+const long LIMITA_SUP = (long)1e9;
 
 alignas(1024) int vb;
 
@@ -103,8 +103,60 @@ void benchmark(void (*pf)(long, long&), long n, string info) {
 
 int main() {
 
-	benchmark(calculSecventialNumarDivizori, N, "Test secvential ");
+	//benchmark(calculSecventialNumarDivizori, N, "Test secvential ");
 	//benchmark(calculParalelNumarDivizoriMutex, N, "Test paralel cu mutex ");
-	benchmark(calculParalelNumarDivizoriRezultatePartiale, N, "Test paralel cu rezultate partiale ");
-	benchmark(calculParalelNumarDivizoriRezultatePartialeCuDistantaControlata, N, "Test paralel cu rezultate partiale distantate in memorie ");
+	//benchmark(calculParalelNumarDivizoriRezultatePartiale, N, "Test paralel cu rezultate partiale ");
+	//benchmark(calculParalelNumarDivizoriRezultatePartialeCuDistantaControlata, N, "Test paralel cu rezultate partiale distantate in memorie ");
+
+	int contor = 150;
+	int variabilaLocala = 500;
+	int variabilaPartajata = 0;
+	int variabila = 200;
+	string mesaj = "Hello ";
+	int nrProcesoare = omp_get_num_procs();
+
+	printf("\n Numarul maxim de thread-uri ce pot fi obtinute este %d", omp_get_max_threads());
+
+#pragma omp parallel if(nrProcesoare > 4) \
+	private(contor) firstprivate(variabilaLocala) shared(variabilaPartajata) default(shared)
+	{
+		contor = 0;
+		for (int i = 0; i < 100; i++) {
+			contor += 1;
+			variabilaLocala += 1;
+			variabilaPartajata += 1;
+			variabila += 1;
+		}
+		
+		printf("\n%s de la thread-ul cu id-ul %d", mesaj.c_str(), omp_get_thread_num());
+		printf("\n Valoare contor = %d", contor);
+		printf("\n Valoare locala = %d", variabilaLocala);
+	}
+
+	printf("\n Valoare contor = %d", contor);
+	printf("\n Valoare partajata = %d", variabilaPartajata);
+
+	omp_set_num_threads(4);
+
+	printf("\n ------------------- Zona cu 4 thread-uri");
+
+#pragma omp parallel 
+	{
+		printf("\n%s de la thread-ul cu id-ul %d", mesaj.c_str(), omp_get_thread_num());
+	}
+
+#pragma omp parallel 
+	{
+		printf("\n%s de la thread-ul cu id-ul %d", mesaj.c_str(), omp_get_thread_num());
+	}
+
+	printf("\n ------------------- Zona paralela cu 2 thread-uri");
+
+#pragma omp parallel num_threads(2)
+	{
+		printf("\n%s de la thread-ul cu id-ul %d", mesaj.c_str(), omp_get_thread_num());
+	}
+
+	printf("\n Numarul maxim de thread-uri ce pot fi obtinute este %d", omp_get_max_threads());
+
 }
