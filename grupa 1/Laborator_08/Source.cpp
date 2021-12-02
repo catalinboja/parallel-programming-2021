@@ -240,6 +240,18 @@ void implementareParalelaOMPCuAtomic(long N, int& rezultat) {
 	}
 }
 
+void implementareParalelaCuFor(long N, int& rezultat) {
+	rezultat = 0;
+	int rezultatLocal = 0;
+#pragma omp parallel for reduction(+: rezultatLocal) schedule(guided)
+	for (int i = 0; i < N; i++) {
+		if (testPrim(i)) {
+			rezultatLocal += 1;
+		}
+	}
+	rezultat = rezultatLocal;
+}
+
 int minimVectorParalel(int valori[], long N) {
 	int minim = valori[0];
 
@@ -279,8 +291,9 @@ int main() {
 	//benchmark("Implementare paralela cu intervale egale", implementareParalelaIntervaleEgale, N);
 	//benchmark("Implementare paralela cu numar par de thread-uri si eliminare valori pare", implementareParalelaLoadBalancing, N);
 	//benchmark("Implementare paralela cu OMP", implementareParalelaOMP, N);
-	benchmark("Implementare paralela cu OMP fara cache sharing", implementareParalelaOMPFaraCacheSharing, N);
+	//benchmark("Implementare paralela cu OMP fara cache sharing", implementareParalelaOMPFaraCacheSharing, N);
 	benchmark("Implementare paralela cu OMP cu variabile private", implementareParalelaOMPCuVariabilePrivate, N);
 	benchmark("Implementare paralela cu OMP cu mutex", implementareParalelaOMPCuVariabilePrivateFaraRaceCondition, N);
 	benchmark("Implementare paralela cu OMP cu atomic", implementareParalelaOMPCuAtomic, N);
+	benchmark("Implementare paralela cu OMP cu for", implementareParalelaCuFor, N);
 }
