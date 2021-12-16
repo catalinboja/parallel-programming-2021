@@ -28,6 +28,7 @@ bool esteSortatCrescator(int* valori, int N) {
 			break;
 		}
 	}
+	return esteSortat;
 }
 
 void benchmark(int* valori, int N, void (*pf)(int*, int), string mesaj) {
@@ -56,19 +57,41 @@ void swap(int& a, int& b) {
 }
 
 void sortareBubble(int* valori, int N) {
-	bool isOver = false;
+	bool isOver = true;
 	do {
-		bool isOver = false;
+		isOver = true;
 		for (int i = 1; i < N; i++)
 			if (valori[i - 1] > valori[i])
 			{
 				swap(valori[i - 1], valori[i]);
-				isOver = true;
+				isOver = false;
 			}
 	} while (!isOver);
 
 }
 
-int main() {
+void sortareOddEvenSecvential(int* v, int N) {
+	for (int it = 0; it < N; it++)
+	{
+		if (it % 2 == 1) {
+			for (int i = 2; i < N; i += 2)
+				if (v[i - 1] > v[i])
+					swap(v[i - 1], v[i]);
+		}
+		else {
+			for (int i = 1; i < N; i += 2)
+				if (v[i - 1] > v[i])
+					swap(v[i - 1], v[i]);
+		}
+	}
+}
 
+int main() {
+	const int N = 1e5;
+	int* valori = generare(N);
+	int* copie = copiere(valori, N);
+
+	//Test pentru Bubble Sort
+	//Durata sortare = 69.6267
+	//benchmark(copie, N, sortareBubble, "Bubble Sort");
 }
