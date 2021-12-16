@@ -86,6 +86,24 @@ void sortareOddEvenSecvential(int* v, int N) {
 	}
 }
 
+void sortareOddEvenParalel(int* v, int N) {
+
+	for (int it = 0; it < N; it++) {
+		if (it % 2 == 1) {
+#pragma omp parallel for shared(v)
+			for (int i = 2; i < N; i += 2)
+				if (v[i - 1] > v[i])
+					swap(v[i - 1], v[i]);
+		}
+		else {
+#pragma omp parallel for shared(v)
+			for (int i = 1; i < N; i += 2)
+				if (v[i - 1] > v[i])
+					swap(v[i - 1], v[i]);
+		}
+	}
+}
+
 int main() {
 	const int N = 1e5;
 	int* valori = generare(N);
@@ -94,4 +112,10 @@ int main() {
 	//Test pentru Bubble Sort
 	//Durata sortare = 69.6267
 	//benchmark(copie, N, sortareBubble, "Bubble Sort");
+
+	//Test pentru Odd-Even Sort
+	//Durata sortare = 53.0702
+	//benchmark(copie, N, sortareOddEvenSecvential, "Odd-Even Sort");
+
+	
 }
