@@ -272,22 +272,33 @@ void sortareBitonicParalel(int* valori, int N) {
 }
 
 int main() {
-	const int N = pow(2, 20);		//avem nevoie pentru bitonic sort
+	const int N = pow(2, 25);		//avem nevoie pentru bitonic sort
+	//const int N = 1e5;
 	int* valori = generare(N);
 	int* copie = copiere(valori, N);
 
+	//Test pentru Bubble Sort
+	//Durata sortare = 72.5686
 	//benchmark(copie, N, sortareBubble, "Bubble Sort");
 
-
+	//Test pentru Odd-Even Sort
+	//Durata sortare = 52.893
 	//benchmark(copie, N, sortareOddEvenSecvential, "Odd-Even Sort");
 
-
+	//Test pentru Odd - Even Parallel Sort
+	//Durata sortare = 26.8765
 	//benchmark(copie, N, sortareOddEvenParalel, "Odd-Even Parallel Sort");
 
+	//Test pentru Merge Sort
+	//Durata sortare = 0.140404
+	//Test pentru Merge Sort pentru 2^25 valori
+	//Durata sortare = 31.7488
+	benchmark(valori, N, sortareMerge, "Merge Sort");
 
-	//benchmark(valori, N, sortareMerge, "Merge Sort");
-
-
-	//benchmark(copie, N, sortareBitonicParalel, "Bitonic Sort Paralel");
+	//Test pentru Bitonic Sort Paralel
+	//Durata sortare = 0.158533
+	//Test pentru Bitonic Sort Paralel pentru 2^25 valori
+	//Durata sortare = 41.6421
+	benchmark(copie, N, sortareBitonicParalel, "Bitonic Sort Paralel");
 
 }
