@@ -171,94 +171,108 @@ void sortareMerge(int* valori, int N) {
 	mergeSort(valori, 0, N - 1);
 }
 
-//bitonic sort - secvential
-//https://people.cs.rutgers.edu/~venugopa/parallel_summer2012/bitonic_openmp.html
 
-int m;
-#define MAX(A, B) (((A) > (B)) ? (A) : (B))
-#define MIN(A, B) (((A) > (B)) ? (B) : (A))
-#define UP 0
-#define DOWN 1
+//bitonic sort
+//https://github.com/richursa/cpuBitonicSort/blob/master/bitonicSort.cpp
 
-void bitonic_sort_seq(int start, int length, int* seq, int flag)
+
+void ascendingSwap(int index1, int index2, int* ar)                                           //swap two values such that they appear in ascending order in the array
 {
-	int i;
-	int split_length;
-
-	if (length == 1)
-		return;
-
-	if (length % 2 != 0)
+	if (ar[index2] < ar[index1])
 	{
-		printf("error\n");
-		exit(0);
+		int temp = ar[index2];
+		ar[index2] = ar[index1];
+		ar[index1] = temp;
+	}
+}
+void decendingSwap(int index1, int index2, int* ar)                                           //swap two values such that they appear in decending order in the array
+{
+	if (ar[index1] < ar[index2])
+	{
+		int temp = ar[index2];
+		ar[index2] = ar[index1];
+		ar[index1] = temp;
+	}
+}
+void bitonicSortFromBitonicSequence(int startIndex, int lastIndex, int dir, int* ar)     //form a increaseing or decreasing array when a bitonic input is given to the function
+{
+	if (dir == 1)
+	{
+		int counter = 0;                                                                    //counter to keep track of already swapped elements ,, parallelising this area results in poor performance due to overhead ,,need to fix
+		int noOfElements = lastIndex - startIndex + 1;
+		for (int j = noOfElements / 2; j > 0; j = j / 2)
+		{
+			counter = 0;
+			for (int i = startIndex; i + j <= lastIndex; i++)
+			{
+				if (counter < j)
+				{
+					ascendingSwap(i, i + j, ar);
+					counter++;
+
+				}
+				else
+				{
+					counter = 0;
+					i = i + j - 1;
+
+				}
+			}
+		}
+	}
+	else                                                                                    //decending sort
+	{
+		int counter = 0;
+		int noOfElements = lastIndex - startIndex + 1;
+		for (int j = noOfElements / 2; j > 0; j = j / 2)
+		{
+			counter = 0;
+			for (int i = startIndex; i <= (lastIndex - j); i++)
+			{
+				if (counter < j)
+				{
+					decendingSwap(i, i + j, ar);
+					counter++;
+
+				}
+				else
+				{
+					counter = 0;
+					i = i + j - 1;
+
+				}
+			}
+		}
 	}
 
-	split_length = length / 2;
-
-	// bitonic split
-	for (i = start; i < start + split_length; i++)
+}
+void bitonicSequenceGenerator(int startIndex, int lastIndex, int* ar)                         //generate a bitonic sequence  from a a random order
+{
+	int noOfElements = lastIndex - startIndex + 1;
+	for (int j = 2; j <= noOfElements; j = j * 2)
 	{
-		if (flag == UP)
+#pragma omp parallel for                                                         //parallel implementation results in most performance gains here
+		for (int i = 0; i < noOfElements; i = i + j)
 		{
-			if (seq[i] > seq[i + split_length])
-				swap(seq[i], seq[i + split_length]);
-		}
-		else
-		{
-			if (seq[i] < seq[i + split_length])
-				swap(seq[i], seq[i + split_length]);
+			if (((i / j) % 2) == 0)                                                               //extra computation results in drastically lower performance ,need to fix
+			{
+				bitonicSortFromBitonicSequence(i, i + j - 1, 1, ar);
+			}
+			else
+			{
+				bitonicSortFromBitonicSequence(i, i + j - 1, 0, ar);
+			}
 		}
 	}
-
-	bitonic_sort_seq(start, split_length, seq, flag);
-	bitonic_sort_seq(start + split_length, split_length, seq, flag);
 }
 
-void bitonic_sort_par(int start, int length, int* seq, int flag)
-{
-	int i;
-	int split_length;
-
-	if (length == 1)
-		return;
-
-	if (length % 2 != 0)
-	{
-		printf("The length of a (sub)sequence is not divided by 2.\n");
-		exit(0);
-	}
-
-	split_length = length / 2;
-
-	// bitonic split
-#pragma omp parallel for shared(seq, flag, start, split_length) private(i)
-	for (i = start; i < start + split_length; i++)
-	{
-		if (flag == UP)
-		{
-			if (seq[i] > seq[i + split_length])
-				swap(seq[i], seq[i + split_length]);
-		}
-		else
-		{
-			if (seq[i] < seq[i + split_length])
-				swap(seq[i], seq[i + split_length]);
-		}
-	}
-
-	if (split_length > m)
-	{
-		// m is the size of sub part-> n/numThreads
-		bitonic_sort_par(start, split_length, seq, flag);
-		bitonic_sort_par(start + split_length, split_length, seq, flag);
-	}
-
-	return;
+void sortareBitonicParalel(int* valori, int N) {
+	//bitonic_sort_par(0, N, valori, UP);
+	bitonicSequenceGenerator(0, N - 1, valori);
 }
 
 int main() {
-	const int N = 2^17;		//avem nevoie pentru bitonic sort
+	const int N = pow(2,20);		//avem nevoie pentru bitonic sort
 	int* valori = generare(N);
 	int* copie = copiere(valori, N);
 
@@ -277,7 +291,11 @@ int main() {
 
 
 	//Test pentru Merge Sort
-	//Durata sortare = 0.164617
-	benchmark(copie, N, sortareMerge, "Merge Sort");
+	//Durata sortare = 0.870414
+	benchmark(valori, N, sortareMerge, "Merge Sort");
+
+	//Test pentru Bitonic Sort Paralel
+	//Durata sortare = 0.976138
+	benchmark(copie, N, sortareBitonicParalel, "Bitonic Sort Paralel");
 
 }
