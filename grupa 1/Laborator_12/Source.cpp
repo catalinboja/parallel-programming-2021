@@ -49,6 +49,26 @@ void benchmark(int* valori, int N, void (*pf)(int*, int), string mesaj) {
 }
 
 
+void swap(int& a, int& b) {
+	int temp = a;
+	a = b;
+	b = temp;
+}
+
+void sortareBubble(int* valori, int N) {
+	bool isOver = false;
+	do {
+		bool isOver = false;
+		for (int i = 1; i < N; i++)
+			if (valori[i - 1] > valori[i])
+			{
+				swap(valori[i - 1], valori[i]);
+				isOver = true;
+			}
+	} while (!isOver);
+
+}
+
 int main() {
 
 }
